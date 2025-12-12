@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="sticky-sub-header">
+    <div class="sub-header-container">
+        <div class="breadcrumb"><a href="{% url 'product_list' %}">خانه</a> / <span style="font-weight: bold;">{{ product.name }}</span></div>
+        <a href="{% url 'product_list' %}" class="back-btn">بازگشت</a>
+    </div>
+</div>
+<div class="product-page-container" style="max-width: 1200px; margin: 20px auto; padding: 0 20px;">
+    <div style="background: white; padding: 30px; border-radius: 12px; display: flex; flex-wrap: wrap; gap: 40px;">
+        <div style="flex: 1; text-align: center;"><img src="{% if product.image %}{{ product.image.url }}{% endif %}" style="max-width: 100%; max-height: 400px; object-fit: contain;"></div>
+        <div style="flex: 1.5;">
+            <h1 style="font-size: 28px;">{{ product.name }}</h1>
+            <p style="color: #555;">{{ product.description }}</p>
+            <div style="font-size: 24px; font-weight: bold; margin: 20px 0;">{{ product.price }} تومان</div>
+            <div class="product-card" data-id="{{ product.id }}" style="box-shadow: none; padding: 0;">
+                <div class="product-name" style="display:none;">{{ product.name }}</div><div class="product-price" style="display:none;">{{ product.price }}</div><div class="product-image" style="display:none;"><img src="{{ product.image.url }}"></div>
+                {% if product.stock > 0 %}<button class="add-to-cart" style="width: 100%; padding: 15px; font-size: 18px; background-color: #ef394e; color: white; border: none; border-radius: 8px;">افزودن به سبد خرید</button>{% else %}<button disabled style="width: 100%; padding: 15px; background: #ccc;">ناموجود</button>{% endif %}
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 40px; background: white; padding: 30px; border-radius: 12px;">
+        <h3>نظرات</h3>
+        <div style="margin-bottom: 30px;">
+            {% for review in reviews %}
+                <div style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+                    <strong>{{ review.user.first_name }}</strong> <span style="color:orange;">★ {{ review.rating }}</span>
+                    <p>{{ review.comment }}</p>
+                    {% if review.admin_reply %}<div style="background:#f0f8ff; padding:10px; margin-top:5px;"><b>پاسخ مدیر:</b> {{ review.admin_reply }}</div>{% endif %}
+                </div>
+            {% empty %}<p>نظری نیست.</p>{% endfor %}
+        </div>
+        <h4>ثبت نظر</h4>
+        {% if request.user.is_authenticated %}
+            <form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit" class="auth-btn">ارسال</button></form>
+        {% else %}<p>لطفا وارد شوید.</p>{% endif %}
+    </div>
+</div>
+{% endblock %}

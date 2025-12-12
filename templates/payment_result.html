@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 600px; margin: 100px auto; padding: 40px; background: white; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+    {% if success %}
+        <div style="font-size: 60px; color: green; margin-bottom: 20px;">✓</div>
+        <h2 style="color: green; margin-bottom: 10px;">پرداخت موفقیت‌آمیز بود!</h2>
+        <p style="color: #555;">سفارش شما با شماره <b>{{ order.id }}</b> ثبت و پرداخت شد.</p>
+        {% if ref_id %}
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0; font-family: monospace; font-size: 16px;">
+                کد پیگیری تراکنش: {{ ref_id }}
+            </div>
+        {% endif %}
+        <a href="{% url 'profile' %}" class="cta-button">مشاهده سفارش در پروفایل</a>
+    {% else %}
+        <div style="font-size: 60px; color: red; margin-bottom: 20px;">✕</div>
+        <h2 style="color: red; margin-bottom: 10px;">پرداخت ناموفق</h2>
+        <p style="color: #555;">{{ message }}</p>
+        <a href="{% url 'product_list' %}" class="cta-button" style="background: #333;">بازگشت به فروشگاه</a>
+    {% endif %}
+</div>
+<script>
+    // خالی کردن سبد خرید در صورت موفقیت
+    {% if success %}
+        localStorage.removeItem('cart');
+    {% endif %}
+</script>
+{% endblock %}

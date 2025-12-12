@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <section class="story-slider-section" style="margin-top: 20px;">
+        <div class="story-slider" id="storySlider">
+            <div class="slides-wrapper" id="slidesWrapper">
+                {% if sliders %}{% for slide in sliders %}<div class="slide">{% if slide.link %}<a href="{{ slide.link }}"><img src="{{ slide.image.url }}" alt="{{ slide.title }}"></a>{% else %}<img src="{{ slide.image.url }}" alt="{{ slide.title }}">{% endif %}</div>{% endfor %}
+                {% else %}<div class="slide"><img src="https://via.placeholder.com/1300x450" alt="Default"></div>{% endif %}
+            </div>
+            {% if sliders|length > 1 %}<button class="slider-btn prev" id="prevBtn">❮</button><button class="slider-btn next" id="nextBtn">❯</button><div class="slider-dots" id="sliderDots"></div>{% endif %}
+        </div>
+    </section>
+    <section class="products-section" id="products-section">
+        <div class="section-header">
+            <h2 class="section-title">منتخب محصولات</h2>
+            <div class="filter-container">
+                <button id="openFilterBtn">فیلتر ▼</button>
+                <div class="filter-sort-controls" id="filterSortControls">
+                    <select onchange="location = this.value;"><option value="{% url 'product_list' %}">همه</option>{% for c in categories %}<option value="{% url 'product_list_by_category' c.slug %}" {% if category.id == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
+                    <select onchange="location.href='?sort='+this.value"><option value="newest">جدیدترین</option><option value="price-asc">ارزان‌ترین</option><option value="price-desc">گران‌ترین</option></select>
+                </div>
+            </div>
+        </div>
+        <div class="products-grid" id="productsGrid">
+            {% for product in products %}
+            <div class="product-card" data-id="{{ product.id }}">
+                <a href="{% url 'product_detail' product.id product.slug %}" style="display: contents;">
+                    <div class="product-image"><img src="{% if product.image %}{{ product.image.url }}{% endif %}" alt="{{ product.name }}" loading="lazy"></div>
+                    <div class="product-info"><div class="product-category">{{ product.category.name }}</div><h3 class="product-name">{{ product.name }}</h3><div class="product-price">{{ product.price }}</div>
+                        {% if product.stock > 0 %}<div class="product-actions"><button class="add-to-cart">افزودن به سبد</button></div>{% else %}<div class="product-actions"><button disabled style="background:#ccc;">ناموجود</button></div>{% endif %}
+                    </div>
+                </a>
+            </div>
+            {% empty %}<div style="grid-column: 1/-1; text-align: center; padding: 60px;"><h3>محصولی یافت نشد!</h3></div>{% endfor %}
+        </div>
+    </section>
+{% endblock %}

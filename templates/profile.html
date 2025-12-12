@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="product-page-container" style="max-width: 1000px; margin: 50px auto; padding: 20px;">
+    <div style="background: white; padding: 30px; border-radius: 12px;">
+        <h2>سفارش‌های من ({{ request.user.first_name }})</h2>
+        <a href="{% url 'logout' %}" style="color: red;">خروج</a>
+        <div style="margin-top: 20px;">
+            {% for order in orders %}
+                <div style="border: 1px solid #eee; padding: 15px; margin-bottom: 15px;">
+                    <div>سفارش #{{ order.id }} | {{ order.created|date:"Y/m/d" }} | <span style="color: green;">{{ order.final_price }} تومان</span></div>
+                    <ul>{% for item in order.items.all %}<li>{{ item.product.name }} ({{ item.quantity }})</li>{% endfor %}</ul>
+                </div>
+            {% empty %}<p>سفارشی ندارید.</p>{% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

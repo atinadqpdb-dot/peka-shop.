@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ site_setting.site_name|default:"Peka Store" }} | فروشگاه آنلاین</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>:root { --primary-color: {{ site_setting.primary_color|default:"#ef394e" }}; --secondary-color: {{ site_setting.secondary_color|default:"#0071e3" }}; }</style>
+</head>
+<body>
+    {% if site_setting.is_top_bar_active %}<div class="top-bar">{{ site_setting.top_bar_text }}</div>{% endif %}
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'product_list' %}" class="nav-logo">
+                {% if site_setting.site_logo %}<img src="{{ site_setting.site_logo.url }}" alt="{{ site_setting.site_name }}" style="height: 40px;">{% else %}{{ site_setting.site_name|default:"Peka" }}{% endif %}
+            </a>
+            <div class="nav-actions">
+                <form action="{% url 'product_list' %}" method="get" class="search-box">
+                    <input type="text" name="q" placeholder="جستجو..." id="searchInput" value="{{ request.GET.q|default:'' }}" autocomplete="off">
+                    <button type="submit" style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">🔍</button>
+                    <div id="search-suggestions" class="hidden"></div>
+                </form>
+                <a href="#" id="cartIcon" style="color: var(--text-dark); text-decoration: none;"></a>
+                <div id="user-account-link">
+                    {% if request.user.is_authenticated %}
+                        <a href="{% url 'profile' %}" style="font-size: 14px;">پروفایل ({{ request.user.first_name|default:request.user.username }})</a>
+                    {% else %}
+                        <a href="#" id="login-btn" style="font-size: 14px;">ورود / ثبت‌نام</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% block content %}{% endblock %}
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-column"><h3>تماس</h3><ul class="footer-links">{% if site_setting.address %}<li>📍 {{ site_setting.address }}</li>{% endif %}{% if site_setting.phone %}<li>📞 {{ site_setting.phone }}</li>{% endif %}</ul></div>
+            <div class="footer-column"><h3>خرید</h3><ul class="footer-links"><li><a href="#">پیگیری</a></li></ul></div>
+            <div class="footer-column"><h3>خدمات</h3><ul class="footer-links"><li><a href="#">گارانتی</a></li></ul></div>
+        </div>
+        <div class="footer-bottom"><div>© 2025 {{ site_setting.site_name|default:"Peka" }}.</div></div>
+    </footer>
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div class="cart-panel" id="cartPanel">
+        <div class="cart-header"><h2 class="cart-title">سبد خرید</h2><button class="close-cart" id="closeCart">×</button></div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-coupon" style="padding: 15px 0; border-top: 1px solid #eee; margin-top: auto;">
+            <div style="display: flex; gap: 10px;"><input type="text" id="couponCode" placeholder="کد تخفیف" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"><button id="applyCouponBtn" style="background: #333; color: #fff; border: none; padding: 0 15px; border-radius: 8px; cursor: pointer;">اعمال</button></div>
+            <div id="couponMessage" style="font-size: 12px; margin-top: 8px; font-weight: bold;"></div>
+        </div>
+        <div class="cart-summary">
+            <div class="cart-total" style="font-size: 14px; color: #555; font-weight: normal;"><span>مبلغ کل:</span><span id="cartSubTotal">۰ تومان</span></div>
+            <div class="cart-total" style="font-size: 14px; color: #ef394e; display: none;" id="discountRow"><span>تخفیف:</span><span id="cartDiscount">۰ تومان</span></div>
+            <div class="cart-total" style="font-size: 18px; margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px;"><span>مبلغ قابل پرداخت:</span><span id="cartFinalTotal">۰ تومان</span></div>
+            <button class="checkout-btn" id="checkoutBtn">تکمیل سفارش</button>
+        </div>
+    </div>
+    <div class="checkout-modal modal" id="checkoutModal">
+        <div class="checkout-content">
+            <span class="close-checkout" id="closeCheckout">×</span>
+            <h2>اطلاعات</h2>
+            <div class="checkout-form">
+                <div class="form-group"><label>نام کامل</label><input type="text" id="fullname" required></div>
+                <div class="form-group"><label>تلفن</label><input type="tel" id="phone" required></div>
+                <div class="form-group"><label>آدرس</label><input type="text" id="address" required></div>
+                <button class="submit-order" id="submitOrder">ثبت نهایی</button>
+            </div>
+        </div>
+    </div>
+    <div id="quantityModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal-btn" id="closeQuantityModal">×</span>
+            <img id="quantityModalImage" src="" alt="">
+            <h3 id="quantityModalName"></h3>
+            <div class="quantity-controller"><button id="decreaseQuantityBtn">-</button><span id="quantityModalQuantity">1</span><button id="increaseQuantityBtn">+</button></div>
+            <div id="quantityModalTotal">جمع: <span></span></div>
+            <button id="confirmAddToCartBtn">افزودن به سبد</button>
+        </div>
+    </div>
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal-btn" id="closeAuthModal">×</span>
+            <div id="email-step"><h2>ورود/ثبت‌نام</h2><form id="email-form"><div class="form-group"><input type="email" id="email-input" placeholder="ایمیل" required></div><button type="submit" class="auth-btn">ادامه</button></form></div>
+            <div id="password-step" style="display:none;"><h2>رمز عبور</h2><form id="password-form"><div class="form-group"><input type="password" id="password-input" required></div><button type="submit" class="auth-btn">ورود</button></form></div>
+        </div>
+    </div>
+    <div id="ai-assistant-container">
+        <div id="ai-intro-container"><div id="ai-initial-prompt"><p>کمک؟</p><div class="prompt-buttons"><button id="ai-prompt-no">نه</button><button id="ai-prompt-yes">بله</button></div></div><div id="ai-avatar"><div class="avatar-part avatar-head"></div><div class="avatar-part avatar-body"></div></div></div>
+        <div id="ai-dock-station" class="hidden">🤖</div>
+        <div id="ai-chat-window">
+            <div class="chat-header"><span>دستیار</span><button class="close-chat-btn">×</button></div>
+            <div class="chat-body" id="ai-chat-body"></div>
+            <div class="chat-footer"><form id="ai-chat-form"><input type="text" id="ai-chat-input" placeholder="..."><button type="submit">➤</button></form></div>
+        </div>
+    </div>
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
