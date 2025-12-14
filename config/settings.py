@@ -1,19 +1,16 @@
 from pathlib import Path
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# کلید امنیتی (در حالت واقعی باید مخفی باشد)
 SECRET_KEY = 'django-insecure-change-me-later-for-production'
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# برای اینکه ارورها را ببینیم فعلا True باشد
 DEBUG = True
 
-# برای سرور PythonAnywhere باید ستاره باشد تا اجازه دسترسی بدهد
 ALLOWED_HOSTS = ['*']
 
-# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -21,12 +18,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # برنامه فروشگاه
     'store',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # --- خط حیاتی برای نمایش استایل‌ها ---
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # -------------------------------------
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -48,7 +47,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # پردازشگر تنظیمات سایت
                 'store.context_processors.site_settings',
             ],
         },
@@ -57,7 +55,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -65,7 +62,6 @@ DATABASES = {
     }
 }
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
     { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
@@ -73,39 +69,29 @@ AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
 
-# Internationalization
 LANGUAGE_CODE = 'fa-ir'
 TIME_ZONE = 'Asia/Tehran'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+# --- تنظیمات فایل‌های استاتیک (CSS/Images) ---
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# این خط برای آپلود روی سرور حیاتی است
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# فشرده‌سازی فایل‌ها برای سرعت بالا
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ==========================================
-# تنظیمات درگاه پرداخت (زرین‌پال واقعی)
-# ==========================================
-
-# کد مرچنت ۳۶ رقمی خود را اینجا قرار دهید (فعلا ۴۰ تا صفر است)
+# تنظیمات درگاه پرداخت (تستی)
 MERCHANT = '00000000-0000-0000-0000-000000000000'
-
-# آدرس‌های اصلی زرین‌پال (بدون sandbox)
-ZP_API_REQUEST = "https://api.zarinpal.com/pg/v4/payment/request.json"
-ZP_API_VERIFY = "https://api.zarinpal.com/pg/v4/payment/verify.json"
-ZP_API_STARTPAY = "https://www.zarinpal.com/pg/StartPay/{authority}"
-
-# آدرس بازگشت (بعد از آپلود، باید آدرس سایت خودتان شود)
-# مثال: http://yourname.pythonanywhere.com/order/verify/
-CALLBACK_URL = 'http://127.0.0.1:8000/order/verify/'
-
+ZP_API_REQUEST = "https://sandbox.zarinpal.com/pg/v4/payment/request.json"
+ZP_API_VERIFY = "https://sandbox.zarinpal.com/pg/v4/payment/verify.json"
+ZP_API_STARTPAY = "https://sandbox.zarinpal.com/pg/StartPay/{authority}"
+# نکته: بعد از اینکه سایت بالا آمد، آدرس دقیق سایت را اینجا جایگزین کنید
+CALLBACK_URL = 'https://peka-shop.onrender.com/order/verify/' 
 DESCRIPTION = "پرداخت سفارش از فروشگاه پکا"
